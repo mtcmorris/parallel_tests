@@ -39,7 +39,7 @@ module ParallelTests
         end
 
         def test_suffix
-          "_spec.rb"
+          /(_spec.rb)|(.feature)$/
         end
 
         private
@@ -49,6 +49,16 @@ module ParallelTests
           `#{cmd}`
         end
 
+        def find_tests(tests, options = {})
+          (tests || []).map do |file_or_folder|
+            if File.directory?(file_or_folder)
+              files = files_in_folder(file_or_folder, options)
+              files.grep(test_suffix).grep(options[:pattern]||//)
+            else
+              file_or_folder
+            end
+          end.flatten.uniq
+        end
         def rspec_1_color
           if $stdout.tty?
             {'RSPEC_COLOR' => "1"}
